@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire Fiches & Profil RIASEC Métierscope - par Ψlippe SAMIER</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+     :root {
+        --primary-color: #0d9488; 
+        --secondary-color: #3b82f6;
+        --accent-color: #f59e0b; 
+        --light-bg: #f0fdfa; 
+        --content-bg: #ffffff;
+        --sidebar-left-bg: #ccfbf1;
+        --sidebar-right-bg: #eff6ff;
+        --panel-form-bg: #eff6ff;
+        --panel-iframe-bg: #f8fafc;
+        --text-color: #0f172a;
+        --text-muted: #475569;
+        --border-color: #cbd5e1;
+        --border-radius: 10px;
+        --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.07);
+        --box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        --sidebar-left-width: 280px;
+        --sidebar-right-width: 300px;
+        --sidebar-gap: 20px;
+        --content-sidebar-gap: 25px;
+        --floating-nav-height: 50px; 
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.75; color: var(--text-color); background-color: var(--light-bg);
+        margin: 0; 
+        padding-top: calc(var(--floating-nav-height) + 20px);
+        padding-bottom: 30px;
+    }
+
+    /* ... (Styles CSS Généraux) ... */
+    #floating-nav { position: fixed; top: 0; left: 0; right: 0; height: var(--floating-nav-height); background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1000; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; }
+    #floating-nav .nav-title { font-family: 'Merriweather', serif; font-size: 1.1rem; font-weight: 600; color: var(--primary-color); }
+    #floating-nav .nav-buttons { display: flex; gap: 10px; }
+    #floating-nav button { background-color: var(--primary-color); color: white; padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: background-color 0.2s; }
+    #floating-nav button:hover { background-color: #0f766e; }
+    #show-summary-btn { background-color: var(--secondary-color); }
+    #show-summary-btn:hover { background-color: #2563eb; }
+    #info-panel, #actions-panel { position: fixed; top: calc(var(--floating-nav-height) + var(--sidebar-gap)); background-color: var(--sidebar-left-bg); border-radius: var(--border-radius); box-shadow: var(--box-shadow-lg); padding: 20px; max-height: calc(100vh - var(--floating-nav-height) - 2 * var(--sidebar-gap)); overflow-y: auto; z-index: 985; display: none; flex-direction: column; }
+    #info-panel { left: var(--sidebar-gap); width: var(--sidebar-left-width); border-left: 5px solid var(--accent-color); }
+    #actions-panel { right: var(--sidebar-gap); width: var(--sidebar-right-width); background-color: var(--sidebar-right-bg); border: 1px solid var(--border-color); }
+    #info-panel h4, #actions-panel h4 { font-family: 'Merriweather', serif; font-size: 1.2em; margin-top: 0; margin-bottom: 10px; padding-bottom: 6px; font-weight: 700; }
+    #info-panel h4 { color: var(--accent-color); border-bottom: 1px solid var(--accent-color); }
+    #actions-panel h4 { color: var(--primary-color); border-bottom: 1px solid var(--primary-color); }
+    #info-panel p { font-size: 0.9em; line-height: 1.6; margin-bottom: 0.7rem; }
+    #info-panel label { font-weight: 600; margin-bottom: 5px; display: block; font-size: 0.95em; color: var(--primary-color); }
+    #info-panel input[type="text"] { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 0.9em; margin-bottom: 15px; }
+    #info-panel input[type="text"]:focus { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2); outline: none; }
+    #actions-panel a { color: var(--primary-color); text-decoration:underline; }
+    #actions-panel a:hover { color: #0f766e; }
+    .main-content-area, #summary-page-area { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 var(--sidebar-gap); }
+    h1 { font-family: 'Merriweather', serif; font-weight: 700; line-height: 1.3; font-size: 1.8rem; color: var(--primary-color); text-align: center; margin-bottom: 0.3rem; margin-top: 10px; }
+    .attribution { display: block; text-align: center; color: var(--text-muted); font-style: italic; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .psi { font-family: 'Merriweather', serif; color: var(--primary-color); font-weight: bold; }
+    .author-name { font-weight: bold; color: #dc2626; font-size: 1.05em; }
+    #section-fiches-metierscope { display: flex; flex-direction: row; margin: 1rem 0; border-radius: var(--border-radius); overflow: hidden; box-shadow: var(--box-shadow-lg); background-color: var(--content-bg); border: 1px solid var(--border-color); width: 100%; }
+    #section-fiches-metierscope .column { padding: 25px; }
+    #fiches-sidebar { flex-basis: 40%; min-width: 320px; background-color: var(--panel-form-bg); border-right: 1px solid var(--border-color); }
+    #fiches-main-content { flex-basis: 60%; background-color: var(--panel-iframe-bg); padding-top: 15px; display: flex; flex-direction: column; }
+    #fiches-sidebar h2 { font-family: 'Merriweather', serif; font-size: 1.5em; color: var(--primary-color); border-bottom: 1px solid var(--primary-color); padding-bottom: 8px; margin-bottom: 20px; }
+    #fiches-main-content h2 { font-family: 'Merriweather', serif; font-size: 1.3em; color: var(--secondary-color); margin-bottom: 15px; text-align: center; }
+    #current-fiche-form-app label { font-size: 0.9em; color: var(--text-muted); margin-bottom: 4px; display: block; font-weight:500; }
+    #current-fiche-form-app input[type="url"], #current-fiche-form-app input[type="text"], #current-fiche-form-app input[type="number"], #current-fiche-form-app textarea { width: 100%; font-size: 0.9em; padding: 10px 12px; margin-bottom: 12px; background-color: #fff; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
+    #current-fiche-form-app input:focus, #current-fiche-form-app textarea:focus { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2); outline: none; }
+    #current-fiche-form-app .button-group { display: flex; justify-content: space-between; gap: 10px; margin-top: 1rem; }
+    .form-button { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; flex: 1; transition: var(--transition); box-shadow: var(--box-shadow); display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; }
+    .form-button:hover { transform: translateY(-2px); box-shadow: var(--box-shadow-lg); }
+    #app-load-current-iframe-btn { background-color: var(--primary-color); color: white; }
+    #app-load-current-iframe-btn:hover { background-color: #0f766e; }
+    #app-save-update-fiche-btn { background-color: var(--secondary-color); color: white;} 
+    #app-save-update-fiche-btn:hover { background-color: #1e40af;} 
+    #app-clear-form-btn { background-color: #6c757d; color: white; }
+    #app-clear-form-btn:hover { background-color: #5a6268; }
+    #current-fiche-form-app .evaluation-group-app label { display: block; font-size: 0.9em; margin-bottom: 5px; font-weight: normal; cursor:pointer; padding: 3px 0;}
+    #current-fiche-form-app .evaluation-group-app input[type="radio"] { margin-right: 8px; vertical-align: middle; accent-color: var(--primary-color); }
+    .data-fields-group { margin-top: 15px; padding-top:15px; border-top: 1px dashed var(--border-color); }
+    .data-fields-group h4 { font-size: 1em; color: var(--text-muted); margin-bottom: 10px; font-weight: 600; }
+    #app-fiches-list-container { margin-top: 25px; }
+    #app-fiches-list-container h3 { font-family: 'Merriweather', serif; font-size: 1.25em; color: var(--primary-color); padding-bottom: 6px; border-bottom: 1px solid var(--primary-color); margin-bottom: 15px; }
+    #app-fiches-list { max-height: 280px; overflow-y: auto; margin-top:10px; padding-right:8px; }
+    #app-fiches-list .fiche-item-hybride { background-color: #fdfdff; border: 1px solid #e0e7ff; padding: 12px 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: var(--transition); }
+    #app-fiches-list .fiche-item-hybride:hover { border-color: var(--secondary-color); transform: translateY(-2px); box-shadow: var(--box-shadow); }
+    #app-fiches-list .fiche-item-hybride h4 { margin: 0 0 6px 0; font-size: 1.05em; font-family: 'Poppins', sans-serif; font-weight:600; color: #1e3a8a;}
+    #app-fiches-list .fiche-item-hybride p { margin: 4px 0; font-size: 0.85em; color: var(--text-muted); word-break: break-word; }
+    #app-fiches-list .fiche-item-hybride p strong { color: var(--text-color); font-weight:500; }
+    #app-fiches-list .fiche-item-hybride .url-link { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+    #app-fiches-list .fiche-item-hybride .url-link:hover { text-decoration: underline; color: #0f766e; }
+    #app-fiches-list .fiche-item-hybride .button-group { margin-top: 10px; margin-bottom: 0; justify-content: flex-end; gap: 8px; }
+    #app-fiches-list .fiche-item-hybride .button-group button.action { padding: 6px 12px; font-size: 0.8em; border-radius: 6px; border: none; box-shadow: var(--box-shadow); }
+    button.action.primary { background-color: var(--secondary-color); color: white; }
+    button.action.primary:hover { background-color: #1e40af; }
+    button.action.danger { background-color: #dc2626; color: white; }
+    button.action.danger:hover { background-color: #b91c1c; }
+    .eval-tres-porteur { color: #15803d !important; font-weight: bold; }
+    .eval-assez-porteur { color: #166534 !important; }
+    .eval-moyen-porteur { color: #1d4ed8 !important; }
+    .eval-peu-porteur { color: #f97316 !important; }
+    .eval-pas-porteur { color: #b91c1c !important; font-weight: bold; }
+    #app-iframe-warning { font-size: 0.85em; margin-top: 5px; margin-bottom: 10px; color: #b91c1c; background-color: #fee2e2; padding: 8px; border-radius: 5px; border-left: 3px solid #f87171; }
+    #app-iframe-viewer { height: calc(100vh - var(--floating-nav-height) - 100px); min-height:450px; border: 1px solid var(--border-color); background-color: #e9ecef; border-radius:var(--border-radius); overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; flex-grow: 1; }
+    #app-iframe-viewer .iframe-placeholder-app { padding: 20px; }
+    #app-iframe-viewer .iframe-placeholder-app i { color: #adb5bd; margin-bottom: 15px; }
+    #app-iframe-viewer .iframe-placeholder-app p {margin-bottom: 10px; font-size:0.95em;}
+    #app-metierscope-iframe {width: 100%; border: none; display:none; flex-grow: 1;}
+    .storage-buttons-panel { display: flex; flex-direction: column; gap: 10px; margin-top: 1.5rem; }
+    .storage-buttons-panel button { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: var(--transition); box-shadow: var(--box-shadow); display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; width: 100%; }
+    #save-fiches-button-panel { background-color: var(--accent-color); color:white;}
+    #save-fiches-button-panel:hover { background-color: #d97706; }
+    #load-fiches-button-panel { background-color: #64748b; color:white;}
+    #load-fiches-button-panel:hover { background-color: #475569; }
+    #fiches-feedback-panel { background-color: var(--secondary-color); color: white; text-align: center; padding: 10px; border-radius: 8px; margin-top: 1rem; display: none; font-weight: 500; font-size: 0.9rem; box-shadow: var(--box-shadow); transition: opacity 0.3s ease-out; opacity: 0;}
+    #app-job-market-feedback { font-size: 0.9em; font-weight: 600; padding: 8px; border-radius: 5px; margin-bottom: 10px; text-align: center; display: none; }
+    .feedback-green { background-color: #dcfce7; color: #15803d; }
+    .feedback-blue { background-color: #dbeafe; color: #1d4ed8; }
+    .feedback-red { background-color: #fee2e2; color: #b91c1c; }
+    .modal { display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(17, 24, 39, 0.7); overflow: auto; backdrop-filter: blur(5px); align-items: center; justify-content: center; }
+    .modal.show { display: flex; }
+    .modal-content { background-color: var(--content-bg); padding: 25px; border-radius: var(--border-radius); max-width: 90%; width: 800px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: var(--box-shadow-lg); }
+    .close-modal { position: absolute; right: 15px; top: 10px; font-size: 28px; font-weight: 300; line-height: 1; cursor: pointer; color: #9ca3af; background: none; border: none; padding: 5px; }
+    .close-modal:hover { color: var(--text-color); }
+    #modal-title-riasec { font-family: 'Merriweather', serif; color: var(--primary-color); border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; font-size: 1.6rem; font-weight: 600; }
+    .riasec-tags-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+    .riasec-tag-item { display: block; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; background-color: #f9fafb; font-size: 0.88rem; text-align: left; cursor: pointer; transition: var(--transition); text-decoration: none; color: var(--text-color); position: relative; }
+    .riasec-tag-item:hover { border-color: var(--primary-color); box-shadow: var(--box-shadow); transform: translateY(-2px); }
+    .riasec-tag-item::after { content: '→'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: bold; }
+    .riasec-tag-item.match-1 { background-color: #fffbeb; border-left: 4px solid #f59e0b; }
+    .riasec-tag-item.match-2 { background-color: #eff6ff; border-left: 4px solid #3b82f6; }
+    .riasec-tag-item.match-3 { background-color: #f0fdfa; border-left: 4px solid #10b981; }
+    #summary-page-area { display: none; padding: 1rem; }
+    .summary-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    #back-to-editor-btn { background-color: #64748b; color: white; padding: 10px 20px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: var(--transition); }
+    #back-to-editor-btn:hover { background-color: #475569; transform: translateY(-2px); }
+    #summary-grid-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; }
+    .summary-fiche-card { background-color: var(--content-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 20px; box-shadow: var(--box-shadow); display: flex; flex-direction: column; gap: 8px; }
+    .summary-fiche-card h3 { font-family: 'Merriweather', serif; font-size: 1.25em; margin: 0; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+    .summary-fiche-card p { font-size: 0.9em; line-height: 1.6; margin: 0; color: var(--text-muted); word-break: break-word; }
+    .summary-fiche-card p strong { color: var(--text-color); font-weight: 600; }
+    .summary-fiche-card .notes-block { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e5e7eb; white-space: pre-wrap; }
+    body.summary-view-active #info-panel, body.summary-view-active #actions-panel { display: none !important; }
+    
+    /* NOUVEAU: Styles pour les boutons de tri */
+    .sort-button {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.1s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .sort-button:hover {
+        background-color: #0f766e;
+        transform: translateY(-1px);
+    }
+    .sort-button.active {
+        background-color: var(--accent-color);
+        color: white;
+        box-shadow: 0 0 0 2px white, 0 0 0 4px var(--accent-color);
+    }
+    .sort-button .fas.fa-arrow-up, .sort-button .fas.fa-arrow-down {
+        font-size: 0.8em;
+    }
+
+    @media (min-width: 1250px) { #info-panel, #actions-panel { display: flex !important; } .main-content-area { margin-left: calc(var(--sidebar-left-width) + var(--sidebar-gap) + var(--content-sidebar-gap)); margin-right: calc(var(--sidebar-right-width) + var(--sidebar-gap) + var(--content-sidebar-gap)); max-width: calc(100% - (var(--sidebar-left-width) + var(--sidebar-right-width) + 2 * var(--sidebar-gap) + 2 * var(--content-sidebar-gap))); padding: 0 1.5rem; } }
+    @media (min-width: 901px) and (max-width: 1249.98px) { #info-panel, #actions-panel { position: relative; top: auto; left: auto; right: auto; width: calc(100% - 2 * var(--sidebar-gap)); max-width: 100%; margin: 1.5rem auto 1rem auto; z-index: auto; transform: translateX(0); display: flex !important; max-height: none; overflow-y: visible; border-left: 5px solid var(--accent-color); } #actions-panel { border-left: 1px solid var(--border-color); } .main-content-area { margin-left: auto; margin-right: auto; max-width: 100%; padding: 0 var(--sidebar-gap); } }
+    @media (max-width: 900px) { #section-fiches-metierscope { flex-direction: column; } #fiches-sidebar { border-right: none; border-bottom: 1px solid var(--border-color); flex-basis: auto; } #fiches-main-content { flex-basis: auto; } #app-iframe-viewer { height: 65vh; min-height: 400px; } #info-panel, #actions-panel { position: relative; top: auto; left: auto; right: auto; width: calc(100% - 2 * var(--sidebar-gap)); max-width: 100%; margin: 1.5rem auto 1rem auto; padding: 20px; max-height: none; overflow-y: visible; z-index: auto; transform: translateX(0); display: flex !important; flex-direction: column; border-left: 5px solid var(--accent-color); } #actions-panel { border-left: 1px solid var(--border-color); } .main-content-area { max-width: 100%; padding: 0 var(--sidebar-gap); margin-left: auto; margin-right: auto; } }
+    @media (max-width: 767.98px) { body { padding-top: calc(var(--floating-nav-height) + 10px); padding-left:10px; padding-right:10px; } h1 { font-size: 1.5rem; } #floating-nav .nav-title { font-size:1rem; } #floating-nav button { font-size: 0.8rem; padding: 6px 10px;} .main-content-area { padding: 0; } #info-panel, #actions-panel { width: 100%; padding: 15px; margin: 1rem 0; }}
+    </style>
+</head>
+<body>
+    <div id="floating-nav">
+        <span class="nav-title">Gestionnaire Métierscope</span>
+        <div class="nav-buttons">
+            <button id="open-riasec-tags-modal-btn"><i class="fas fa-tags mr-2"></i>Centres d'Intérêts</button>
+            <button id="show-summary-btn"><i class="fas fa-grip-horizontal mr-2"></i>Voir la Synthèse</button>
+        </div>
+    </div>
+
+    <div id="info-panel">
+        <h4><i class="fas fa-user-cog mr-2"></i>Mon Profil & Infos</h4>
+        <div>
+            <label for="user-riasec-profile">Mon Profil RIASEC (ex: RAC):</label>
+            <input type="text" id="user-riasec-profile" maxlength="6" placeholder="R, I, A, S, E, C...">
+        </div>
+        <hr class="my-3 border-gray-300">
+        <h4><i class="fas fa-map-marker-alt mr-2"></i>Données Pas-de-Calais</h4>
+        <p>Lorsque vous consultez une fiche Métierscope :</p>
+        <ol class="list-decimal list-inside text-sm">
+            <li class="mb-1">Recherchez les données spécifiques au <strong>Pas-de-Calais (62)</strong>.</li>
+            <li class="mb-1">Notez le nombre de <strong>demandeurs d'emploi</strong>.</li>
+            <li class="mb-1">Notez le nombre d'<strong>offres d'emploi</strong>.</li>
+            <li>Reportez ces chiffres dans le formulaire principal.</li>
+        </ol>
+        <p class="mt-3 text-xs">Par <span class="psi">Ψ</span>lippe <span class="author-name">SAMIER</span></p>
+    </div>
+
+    <div id="actions-panel">
+        <h4><i class="fas fa-cogs mr-2"></i>Actions & Liens</h4>
+        <p class="text-sm mb-3">
+            <a href="https://candidat.francetravail.fr/metierscope/centres-interet" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-external-link-alt fa-sm mr-1"></i> Consulter les Centres d'Intérêts sur Métierscope
+            </a>
+        </p>
+        <hr class="my-3 border-gray-300">
+        <h4 class="mb-2"><i class="fas fa-save mr-2"></i>Sauvegarde des Fiches</h4>
+        <p class="text-xs text-gray-500 mb-2">Les fiches sont automatiquement sauvegardées dans votre navigateur. Utilisez ces boutons pour exporter/importer un fichier.</p>
+        <div class="storage-buttons-panel">
+            <button id="save-fiches-button-panel" title="Enregistrer vos fiches dans un fichier"><i class="fas fa-download"></i> Enregistrer Fiches (Exporter...)</button>
+            <button id="load-fiches-button-panel" title="Charger des fiches depuis un fichier"><i class="fas fa-upload"></i> Charger Fiches (Importer...)</button>
+        </div>
+        <input type="file" id="fiches-file-loader-input-panel" accept=".json" style="display: none;">
+        <div id="fiches-feedback-panel"></div>
+         <p class="mt-auto pt-3 text-xs text-right border-t border-gray-300">Par <span class="psi">Ψ</span>lippe <span class="author-name">SAMIER</span></p>
+    </div>
+
+    <div class="main-content-area">
+        <h1>Gestionnaire de Fiches Métierscope</h1>
+        <span class="attribution">Adapté d'un outil par <span class="psi">Ψ</span>lippe <span class="author-name">SAMIER</span></span>
+
+        <div id="section-fiches-metierscope">
+            <div class="column" id="fiches-sidebar">
+                <h2>Mon Formulaire de Fiche</h2>
+                <p class="text-sm text-gray-600 mb-4">Gardez une trace des fiches métiers que vous explorez et évaluez leur potentiel.</p>
+                
+                <form id="current-fiche-form-app">
+                    <div>
+                        <label for="app-current-url-metier">URL de la Fiche Métierscope :</label>
+                        <input type="url" id="app-current-url-metier" placeholder="Collez l'URL de la fiche ici..." required>
+                    </div>
+                    <div class="button-group" style="justify-content: flex-start; margin-bottom: 12px;">
+                        <button type="button" id="app-load-current-iframe-btn" class="form-button" style="flex:1;"><i class="fas fa-search-location mr-2"></i>Charger Fiche & Pré-remplir Nom</button>
+                    </div>
+                    
+                    <div>
+                        <label for="app-current-nom-metier">Nom du Métier :</label>
+                        <input type="text" id="app-current-nom-metier" required>
+                    </div>
+                    <div>
+                        <label>Évaluation du Marché (général) :</label>
+                        <div class="evaluation-group-app">
+                            <label><input type="radio" name="app-current-eval-marche" value="tres_porteur" checked> Très porteur</label>
+                            <label><input type="radio" name="app-current-eval-marche" value="assez_porteur"> Assez porteur</label>
+                            <label><input type="radio" name="app-current-eval-marche" value="moyen_porteur"> Moyennement</label>
+                            <label><input type="radio" name="app-current-eval-marche" value="peu_porteur"> Peu porteur</label>
+                            <label><input type="radio" name="app-current-eval-marche" value="pas_porteur"> Pas du tout</label>
+                        </div>
+                    </div>
+
+                    <div class="data-fields-group">
+                        <h4>Données Pas-de-Calais (62) - si disponibles sur la fiche :</h4>
+                        <div>
+                            <label for="app-current-demandeurs-62">Nombre de demandeurs (62) :</label>
+                            <input type="number" id="app-current-demandeurs-62" placeholder="Ex: 30" min="0">
+                        </div>
+                        <div>
+                            <label for="app-current-offres-62">Nombre d'offres (62) :</label>
+                            <input type="number" id="app-current-offres-62" placeholder="Ex: 50" min="0">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top:15px;">
+                        <label for="app-current-notes-metier">Notes Personnelles :</label>
+                        <div id="app-job-market-feedback"></div>
+                        <textarea id="app-current-notes-metier" style="min-height:80px;" placeholder="Vos remarques, points clés, adéquation..."></textarea>
+                    </div>
+                    <input type="hidden" id="app-current-fiche-id"> <!-- Champ caché pour l'ID de la fiche en cours d'édition -->
+                    <div class="button-group" style="margin-top: 1.5rem;">
+                        <button type="submit" id="app-save-update-fiche-btn" class="form-button" style="flex:1.2;"><i class="fas fa-plus-circle mr-2"></i>Ajouter / Mettre à Jour</button>
+                        <button type="button" id="app-clear-form-btn" class="form-button" style="flex:0.8;"><i class="fas fa-eraser mr-2"></i>Vider</button>
+                    </div>
+                </form>
+                
+                <div id="app-fiches-list-container">
+                    <h3>Mes Fiches Explorées</h3>
+                    <div id="app-fiches-list">
+                        <p class="text-sm text-gray-500 italic text-center">Aucune fiche ajoutée.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="column" id="fiches-main-content">
+                <h2>Visualiseur de Fiche Métierscope</h2>
+                 <div id="app-iframe-viewer">
+                    <div class="iframe-placeholder-app">
+                        <i class="fas fa-file-import fa-3x"></i>
+                        <p>L'URL chargée s'affichera ici.</p>
+                        <p id="app-iframe-warning" style="display:none;"><i class="fas fa-exclamation-triangle mr-1"></i> Certains sites peuvent bloquer l'affichage ici. Si la page reste blanche, cliquez sur le lien de la fiche pour l'ouvrir dans un nouvel onglet.</p>
+                    </div>
+                    <iframe id="app-metierscope-iframe" src="about:blank" title="Fiche Métierscope"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page de Synthèse -->
+    <div id="summary-page-area">
+        <div class="summary-header">
+            <h1>Synthèse des Fiches Explorées</h1>
+            <button id="back-to-editor-btn"><i class="fas fa-arrow-left mr-2"></i>Retour à l'Éditeur</button>
+        </div>
+        
+        <!-- NOUVEAU: Boutons de Tri -->
+        <div id="summary-sort-options" class="mb-6 p-4 bg-white rounded-lg shadow flex flex-wrap gap-x-4 gap-y-2 items-center justify-center">
+            <span class="font-semibold mr-3 text-gray-700">Trier par :</span>
+            <button data-sort-by="nom" data-sort-dir="asc" class="sort-button"><i class="fas fa-font mr-1"></i>Nom</button>
+            <button data-sort-by="date" data-sort-dir="desc" class="sort-button"><i class="fas fa-calendar-alt mr-1"></i>Date</button>
+            <button data-sort-by="evaluation" data-sort-dir="desc" class="sort-button"><i class="fas fa-chart-line mr-1"></i>Évaluation Marché</button>
+            <button data-sort-by="tension62" data-sort-dir="asc" class="sort-button"><i class="fas fa-users mr-1"></i>Tension (62)</button>
+        </div>
+
+        <div id="summary-grid-content">
+            <!-- Les fiches en grille seront injectées ici par le JavaScript -->
+        </div>
+    </div>
+
+
+    <!-- Modale pour les Étiquettes RIASEC -->
+    <div id="riasec-tags-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-riasec-tags-modal-btn" title="Fermer">×</button>
+            <h3 id="modal-title-riasec">Centres d'Intérêts Métierscope (Profil RIASEC)</h3>
+            <p class="text-sm text-gray-600 mb-4">Cliquez sur une étiquette pour explorer la catégorie sur Métierscope (nouvel onglet). Les couleurs indiquent la correspondance avec votre profil RIASEC saisi : <span style="background-color: #fffbeb;">Orange (1 lettre)</span>, <span style="background-color: #eff6ff;">Bleu (2 lettres)</span>, <span style="background-color: #f0fdfa;">Vert (3+ lettres)</span>.</p>
+            <div class="riasec-tags-grid" id="riasec-tags-grid-content"></div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dom = { /* ... IDs des éléments DOM ... */ 
+        mainContentArea: document.querySelector('.main-content-area'),
+        summaryPageArea: document.getElementById('summary-page-area'),
+        showSummaryBtn: document.getElementById('show-summary-btn'),
+        backToEditorBtn: document.getElementById('back-to-editor-btn'),
+        summaryGridContent: document.getElementById('summary-grid-content'),
+        summarySortOptions: document.getElementById('summary-sort-options'), // NOUVEAU pour les boutons de tri
+        userRiasecProfileInput: document.getElementById('user-riasec-profile'),
+        openRiasecTagsModalBtn: document.getElementById('open-riasec-tags-modal-btn'),
+        riasecTagsModal: document.getElementById('riasec-tags-modal'),
+        closeRiasecTagsModalBtn: document.getElementById('close-riasec-tags-modal-btn'),
+        riasecTagsGridContent: document.getElementById('riasec-tags-grid-content'),
+        ficheForm: document.getElementById('current-fiche-form-app'),
+        ficheIdInput: document.getElementById('app-current-fiche-id'),
+        ficheUrlInput: document.getElementById('app-current-url-metier'),
+        ficheNomInput: document.getElementById('app-current-nom-metier'),
+        ficheEvalRadios: document.querySelectorAll('input[name="app-current-eval-marche"]'),
+        ficheDemandeurs62Input: document.getElementById('app-current-demandeurs-62'),
+        ficheOffres62Input: document.getElementById('app-current-offres-62'),
+        ficheNotesInput: document.getElementById('app-current-notes-metier'),
+        jobMarketFeedback: document.getElementById('app-job-market-feedback'),
+        loadIframeBtn: document.getElementById('app-load-current-iframe-btn'),
+        saveUpdateFicheBtn: document.getElementById('app-save-update-fiche-btn'),
+        clearFicheFormBtn: document.getElementById('app-clear-form-btn'),
+        fichesListDiv: document.getElementById('app-fiches-list'),
+        iframe: document.getElementById('app-metierscope-iframe'),
+        iframePlaceholder: document.querySelector('#app-iframe-viewer .iframe-placeholder-app'),
+        iframeWarning: document.getElementById('app-iframe-warning'),
+        saveFichesBtnPanel: document.getElementById('save-fiches-button-panel'),
+        loadFichesBtnPanel: document.getElementById('load-fiches-button-panel'),
+        fichesFileInputPanel: document.getElementById('fiches-file-loader-input-panel'),
+        fichesFeedbackDivPanel: document.getElementById('fiches-feedback-panel')
+    };
+
+    const riasecInterestsData = [ /* ... URLs RIASEC CORRIGÉES ... */
+        { text: "J'ai envie de créer, construire, rénover", riasec: "ARI", url: "https://candidat.francetravail.fr/metierscope/centres-interet/1/ai-envie-de-creer-construire-renover" },
+        { text: "J'ai l'âme d'un chef / d'une cheffe", riasec: "ESC", url: "https://candidat.francetravail.fr/metierscope/centres-interet/2/ai-ame-un-chef-une-cheffe" },
+        { text: "J'ai le sens des affaires", riasec: "ECS", url: "https://candidat.francetravail.fr/metierscope/centres-interet/3/ai-le-sens-des-affaires" },
+        { text: "J'ai le sens du contact", riasec: "SEC", url: "https://candidat.francetravail.fr/metierscope/centres-interet/4/ai-le-sens-du-contact" },
+        { text: "J'ai le sens du service public", riasec: "SCR", url: "https://candidat.francetravail.fr/metierscope/centres-interet/5/ai-le-sens-du-service-public" },
+        { text: "J'ai le souci du détail", riasec: "RCI", url: "https://candidat.francetravail.fr/metierscope/centres-interet/6/ai-le-souci-du-detail" },
+        { text: "J'ai un bon coup de crayon", riasec: "ARC", url: "https://candidat.francetravail.fr/metierscope/centres-interet/7/ai-un-bon-coup-de-crayon" },
+        { text: "J'aime communiquer, convaincre", riasec: "ESC", url: "https://candidat.francetravail.fr/metierscope/centres-interet/8/aime-communiquer-convaincre" },
+        { text: "J'aime être au contact de la nature", riasec: "RSI", url: "https://candidat.francetravail.fr/metierscope/centres-interet/9/aime-etre-au-contact-de-la-nature" },
+        { text: "J'aime faire des découvertes", riasec: "IRE", url: "https://candidat.francetravail.fr/metierscope/centres-interet/10/aime-faire-des-decouvertes" },
+        { text: "J'aime faire respecter la loi, les règles", riasec: "CSE", url: "https://candidat.francetravail.fr/metierscope/centres-interet/11/aime-faire-respecter-la-loi-les-regles" },
+        { text: "J'aime jouer avec les mots", riasec: "CSI", url: "https://candidat.francetravail.fr/metierscope/centres-interet/12/aime-jouer-avec-les-mots" },
+        { text: "J'aime l'activité physique", riasec: "RAE", url: "https://candidat.francetravail.fr/metierscope/centres-interet/13/aime-activite-physique" },
+        { text: "J'aime le travail manuel", riasec: "RIA", url: "https://candidat.francetravail.fr/metierscope/centres-interet/14/aime-le-travail-manuel" },
+        { text: "J'aime m'occuper des animaux", riasec: "SRI", url: "https://candidat.francetravail.fr/metierscope/centres-interet/17/aime-occuper-des-animaux" },
+        { text: "J'aime manier les chiffres", riasec: "CIE", url: "https://candidat.francetravail.fr/metierscope/centres-interet/15/aime-manier-les-chiffres" },
+        { text: "J'aime me déplacer et voyager", riasec: "RCS", url: "https://candidat.francetravail.fr/metierscope/centres-interet/16/aime-me-deplacer-et-voyager" },
+        { text: "J'aime organiser, planifier", riasec: "CIS", url: "https://candidat.francetravail.fr/metierscope/centres-interet/18/aime-organiser-planifier" },
+        { text: "J'aime piloter, conduire", riasec: "RCI", url: "https://candidat.francetravail.fr/metierscope/centres-interet/19/aime-piloter-conduire" },
+        { text: "Je souhaite contribuer à la protection de l'environnement", riasec: "SRC", url: "https://candidat.francetravail.fr/metierscope/centres-interet/20/je-souhaite-contribuer-a-la-protection-de-environnement" },
+        { text: "Je souhaite m'occuper d'enfants", riasec: "SRA", url: "https://candidat.francetravail.fr/metierscope/centres-interet/21/je-souhaite-occuper-enfants" },
+        { text: "Je souhaite prendre soin des autres", riasec: "SRC", url: "https://candidat.francetravail.fr/metierscope/centres-interet/22/je-souhaite-prendre-soin-des-autres" },
+        { text: "Je souhaite protéger et secourir", riasec: "SRE", url: "https://candidat.francetravail.fr/metierscope/centres-interet/23/je-souhaite-proteger-et-secourir" },
+        { text: "Je souhaite transmettre", riasec: "SCA", url: "https://candidat.francetravail.fr/metierscope/centres-interet/24/je-souhaite-transmettre" },
+        { text: "Je suis amateur / amatrice de sensations fortes", riasec: "ERS", url: "https://candidat.francetravail.fr/metierscope/centres-interet/25/je-suis-amateur-amatrice-de-sensations-fortes" },
+        { text: "Je suis attiré / attirée par l'envers du décor", riasec: "ARS", url: "https://candidat.francetravail.fr/metierscope/centres-interet/26/je-suis-attire-attiree-par-envers-du-decor" },
+        { text: "Je suis passionné / passionnée par la cuisine", riasec: "RCA", url: "https://candidat.francetravail.fr/metierscope/centres-interet/27/je-suis-passionne-passionnee-par-la-cuisine" },
+        { text: "Je suis passionné / passionnée par les autres cultures", riasec: "ISC", url: "https://candidat.francetravail.fr/metierscope/centres-interet/28/je-suis-passionne-passionnee-par-les-autres-cultures" },
+        { text: "Je suis passionné / passionnée par les nouvelles technologies", riasec: "IRC", url: "https://candidat.francetravail.fr/metierscope/centres-interet/29/je-suis-passionne-passionnee-par-les-nouvelles-technologies" },
+        { text: "Je suis un / une artiste", riasec: "ARS", url: "https://candidat.francetravail.fr/metierscope/centres-interet/30/je-suis-un-une-artiste" }
+    ];
+    let appData = { 
+        metierscopeFiches: [], 
+        userRiasecProfile: "",
+        summarySort: { by: 'date', dir: 'desc' } // NOUVEAU: état du tri par défaut
+    };
+    const LOCAL_STORAGE_KEY = 'metierscopeAppData_vA10_Sort'; // Clé mise à jour
+
+    // Fonctions de sauvegarde/chargement locales (inchangées)
+    function saveToLocalStorage() { try{localStorage.setItem(LOCAL_STORAGE_KEY,JSON.stringify(appData))}catch(e){console.error("Erreur sauvegarde locale:",e);showFeedback("Erreur sauvegarde locale.",!0,dom.fichesFeedbackDivPanel)} }
+    function loadFromLocalStorage() { const e=localStorage.getItem(LOCAL_STORAGE_KEY);if(e)try{const o=JSON.parse(e);if(o&&Array.isArray(o.metierscopeFiches)&&"string"==typeof o.userRiasecProfile){appData=o,dom.userRiasecProfileInput.value=appData.userRiasecProfile; if(!appData.summarySort) appData.summarySort = { by: 'date', dir: 'desc' }; /*Init si ancien format*/}}catch(t){console.error("Erreur parsing localStorage:",t)} }
+    
+    function showFeedback(e,o=!1,t=dom.fichesFeedbackDivPanel){ /* ... (inchangé) ... */ t.textContent=e,t.style.backgroundColor=o?"#fee2e2":"#d1fae5",t.style.color=o?"#b91c1c":"#047857",t.style.display="block",requestAnimationFrame(()=>{t.style.opacity="1"}),setTimeout(()=>{t.style.opacity="0",setTimeout(()=>{t.style.display="none"},300)},4e3)}
+    function getAnalysisFeedback(e,o){ /* ... (inchangé) ... */ const t=parseInt(e,10),a=parseInt(o,10);if(isNaN(t)||isNaN(a)||t<0||a<0)return{text:"",className:""};const n=3*a;let r="feedback-blue";return n>0?t/n<.85?r="feedback-green":t/n>1.15&&(r="feedback-red"):t>0&&0===n&&(r="feedback-red"),{text:`Pour Pas-de-Calais (62): ${t} Demandeur(s) pour ~${n} possibilité(s) d'emploi.`,className:r}}
+    function updateJobMarketFeedback(){ /* ... (inchangé) ... */ const{text:e,className:o}=getAnalysisFeedback(dom.ficheDemandeurs62Input.value,dom.ficheOffres62Input.value);e?(dom.jobMarketFeedback.textContent=e,dom.jobMarketFeedback.className=`p-2 rounded-md ${o}`,dom.jobMarketFeedback.style.display="block"):(dom.jobMarketFeedback.style.display="none")}
+    [dom.ficheDemandeurs62Input,dom.ficheOffres62Input].forEach(e=>e.addEventListener("input",updateJobMarketFeedback));
+    function renderFichesList(){ /* ... (inchangé, mais pourrait être trié aussi plus tard) ... */ dom.fichesListDiv.innerHTML="",appData.metierscopeFiches&&0!==appData.metierscopeFiches.length?appData.metierscopeFiches.forEach(e=>{const o=document.createElement("div");o.className="fiche-item-hybride";const t=`eval-${e.evaluation.replace(/_/g,"-")}`;let a="";(e.demandeurs62||e.offres62)&&(a=`<p><strong>Données 62:</strong> Dem: ${e.demandeurs62||"N/A"} / Off: ${e.offres62||"N/A"}</p>`),o.innerHTML=`\n                <h4 class="${t}">${e.nom}</h4>\n                <p><a href="${e.url}" target="_blank" rel="noopener noreferrer" class="url-link" title="Ouvrir dans un nouvel onglet: ${e.url}">\n                    ${e.url.length>40?e.url.substring(0,37)+"...":e.url} <i class="fas fa-external-link-alt fa-xs"></i>\n                </a></p>\n                <p><strong>Éval. Marché:</strong> <span class="${t}">${e.evaluation.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())}</span></p>\n                ${a}\n                ${e.notes?`<p><strong>Notes:</strong> ${e.notes.substring(0,50).replace(/\n/g," ")}${e.notes.length>50?"...":""}</p>`:""}\n                <div class="button-group">\n                    <button type="button" class="action primary" data-fiche-id="${e.id}"><i class="fas fa-edit"></i> Voir/Éditer</button>\n                    <button type="button" class="action danger" data-fiche-id="${e.id}"><i class="fas fa-trash-alt"></i> Suppr.</button>\n                </div>`,o.querySelector("button.action.primary").addEventListener("click",()=>viewFiche(e.id)),o.querySelector("button.action.danger").addEventListener("click",()=>removeFiche(e.id)),dom.fichesListDiv.appendChild(o)}):dom.fichesListDiv.innerHTML='<p class="text-sm text-gray-500 italic text-center">Aucune fiche ajoutée.</p>'}
+    function loadUrlInIframe(e){ /* ... (inchangé) ... */ e&&(dom.iframe.src=e,dom.iframe.style.display="block",dom.iframePlaceholder.style.display="none",dom.iframeWarning.style.display="block")}
+    function viewFiche(e){ /* ... (inchangé) ... */ const o=appData.metierscopeFiches.find(f=>f.id==e);if(o){clearForm(),dom.ficheIdInput.value=o.id,dom.ficheUrlInput.value=o.url,dom.ficheNomInput.value=o.nom,dom.ficheEvalRadios.forEach(t=>{t.checked=t.value===o.evaluation}),dom.ficheDemandeurs62Input.value=o.demandeurs62||"",dom.ficheOffres62Input.value=o.offres62||"",dom.ficheNotesInput.value=o.notes||"",updateJobMarketFeedback(),loadUrlInIframe(o.url),dom.saveUpdateFicheBtn.innerHTML='<i class="fas fa-save mr-2"></i>Mettre à Jour la Fiche',dom.ficheUrlInput.focus();const t=getComputedStyle(document.documentElement).getPropertyValue("--floating-nav-height").trim();let a=50;if(t){const n=parseInt(t,10);isNaN(n)||(a=n)}const r=dom.ficheForm.offsetTop-a-20;window.scrollTo({top:r>0?r:0,behavior:"smooth"})}}
+    function removeFiche(e){ /* ... (inchangé) ... */ confirm("Êtes-vous sûr de vouloir supprimer cette fiche ?")&&(appData.metierscopeFiches=appData.metierscopeFiches.filter(f=>f.id!=e),renderFichesList(),saveToLocalStorage(),dom.ficheIdInput.value==e&&clearForm(),showFeedback("Fiche supprimée."))}
+    function clearForm(){ /* ... (inchangé) ... */ dom.ficheForm.reset(),dom.ficheIdInput.value="",dom.saveUpdateFicheBtn.innerHTML='<i class="fas fa-plus-circle mr-2"></i>Ajouter la Fiche';const e=dom.ficheForm.querySelector('input[name="app-current-eval-marche"][value="tres_porteur"]');e&&(e.checked=!0),dom.jobMarketFeedback.style.display="none",dom.jobMarketFeedback.textContent=""}
+
+    dom.ficheForm.addEventListener("submit",e=>{ // MODIFIÉ: Ajout de la date de création/màj
+        e.preventDefault();
+        const id = dom.ficheIdInput.value;
+        const now = Date.now();
+        const ficheData = {
+            nom: dom.ficheNomInput.value.trim(),
+            url: dom.ficheUrlInput.value.trim(),
+            evaluation: dom.ficheForm.querySelector('input[name="app-current-eval-marche"]:checked').value,
+            demandeurs62: dom.ficheDemandeurs62Input.value.trim(),
+            offres62: dom.ficheOffres62Input.value.trim(),
+            notes: dom.ficheNotesInput.value.trim(),
+            updatedAt: now // Date de dernière modification
+        };
+        if (!ficheData.nom || !ficheData.url) { showFeedback("Nom et URL requis.", true); return; }
+        
+        if (id) { 
+            const index = appData.metierscopeFiches.findIndex(f => f.id == id);
+            if (index > -1) { 
+                appData.metierscopeFiches[index] = { ...appData.metierscopeFiches[index], ...ficheData }; 
+                showFeedback('Fiche mise à jour !'); 
+            }
+        } else { 
+            ficheData.id = now.toString(); 
+            ficheData.createdAt = now; // Date de création initiale
+            appData.metierscopeFiches.push(ficheData); 
+            showFeedback('Fiche ajoutée !');
+        }
+        renderFichesList(); 
+        saveToLocalStorage(); 
+        clearForm();
+    });
+
+    dom.clearFicheFormBtn.addEventListener("click",clearForm);
+    dom.loadIframeBtn.addEventListener("click",()=>{ /* ... (inchangé) ... */ const e=dom.ficheUrlInput.value.trim();if(e){loadUrlInIframe(e);try{const o=new URL(e).pathname.split("/");let t=o.pop()||o.pop();t&&(t=decodeURIComponent(t),t=t.replace(/-/g," ").replace(/\b\w/g,l=>l.toUpperCase()).replace(/\.(html|php|asp|aspx|jsp)$/i,""),t=t.replace(/Z[0-9]+$/i,"").trim(),""===dom.ficheNomInput.value.trim()&&(dom.ficheNomInput.value=t))}catch(a){console.warn("Erreur parsing URL pour nom:",a)}}else showFeedback("Veuillez entrer une URL.",!0)});
+    function populateRiasecTags() { /* ... (inchangé, avec URLs corrigées) ... */ dom.riasecTagsGridContent.innerHTML="",riasecInterestsData.forEach((e,o)=>{const t=document.createElement("a");e.url&&"string"==typeof e.url&&""!==e.url.trim()&&e.url.trim().startsWith("https://")?t.href=e.url.trim():(t.href="https://candidat.francetravail.fr/metierscope/centres-interet",console.warn(`  URL manquante/invalide pour: "${e.text}". URL reçue: "${e.url}". Fallback: ${t.href}`)),t.target="_blank",t.rel="noopener noreferrer",t.className="riasec-tag-item",t.textContent=e.text,t.dataset.riasec=e.riasec.toUpperCase(),dom.riasecTagsGridContent.appendChild(t)}),highlightMatchingTags()}
+    function highlightMatchingTags(){ /* ... (inchangé) ... */ const e=dom.userRiasecProfileInput.value.toUpperCase().trim();document.querySelectorAll(".riasec-tag-item").forEach(o=>{if(o.classList.remove("match-1","match-2","match-3"),e){const t=o.dataset.riasec;if(t){let a=0;[...new Set(e.slice(0,3))].forEach(n=>{[...new Set(t)].includes(n)&&a++}),a>=3?o.classList.add("match-3"):2===a?o.classList.add("match-2"):1===a&&o.classList.add("match-1")}}})}
+    dom.userRiasecProfileInput.addEventListener("input",()=>{appData.userRiasecProfile=dom.userRiasecProfileInput.value,highlightMatchingTags(),saveToLocalStorage()});
+    dom.openRiasecTagsModalBtn.addEventListener("click",()=>{dom.riasecTagsModal.classList.add("show")});
+    dom.closeRiasecTagsModalBtn.addEventListener("click",()=>{dom.riasecTagsModal.classList.remove("show")});
+    window.addEventListener("click",e=>{e.target===dom.riasecTagsModal&&dom.riasecTagsModal.classList.remove("show")});
+    dom.saveFichesBtnPanel.addEventListener("click",async()=>{ /* ... (inchangé) ... */ const e=JSON.stringify(appData,null,2),o=`Fiches_Metierscope_Profil_${(new Date).toISOString().slice(0,10)}.json`;if(window.showSaveFilePicker)try{const t=await window.showSaveFilePicker({suggestedName:o,types:[{description:"Fichiers JSON",accept:{"application/json":[".json"]}}]}),a=await t.createWritable();await a.write(e),await a.close(),showFeedback("Données exportées !",!1,dom.fichesFeedbackDivPanel)}catch(n){"AbortError"!==n.name&&(showFeedback("Erreur exportation.",!0,dom.fichesFeedbackDivPanel),console.error("Save error:",n))}else{const s=new Blob([e],{type:"application/json"}),i=document.createElement("a");i.href=URL.createObjectURL(s),i.download=o,document.body.appendChild(i),i.click(),document.body.removeChild(i),URL.revokeObjectURL(i.href),showFeedback("Export démarré.",!1,dom.fichesFeedbackDivPanel)}});
+    dom.loadFichesBtnPanel.addEventListener("click",()=>{dom.fichesFileInputPanel.click()});
+    dom.fichesFileInputPanel.addEventListener("change",e=>{ /* ... (inchangé) ... */ const o=e.target.files[0];if(o){const t=new FileReader;t.onload=a=>{try{const n=JSON.parse(a.target.result);if(n&&Array.isArray(n.metierscopeFiches)&&"string"==typeof n.userRiasecProfile){appData.metierscopeFiches=n.metierscopeFiches,appData.userRiasecProfile=n.userRiasecProfile,dom.userRiasecProfileInput.value=appData.userRiasecProfile; if(!n.summarySort) appData.summarySort = { by: 'date', dir: 'desc' }; else appData.summarySort = n.summarySort; highlightMatchingTags(),renderFichesList(),saveToLocalStorage(),clearForm(),showFeedback(`Fichier "${o.name}" importé !`,!1,dom.fichesFeedbackDivPanel)}else showFeedback("Format fichier invalide.",!0,dom.fichesFeedbackDivPanel)}catch(r){showFeedback("Erreur import.",!0,dom.fichesFeedbackDivPanel),console.error("Load error:",r)}finally{dom.fichesFileInputPanel.value=null}},t.readAsText(o)}});
+    
+    // NOUVEAU: Logique de tri pour la synthèse
+    const evaluationOrder = { "tres_porteur": 5, "assez_porteur": 4, "moyen_porteur": 3, "peu_porteur": 2, "pas_porteur": 1 };
+
+    function getTensionScore(fiche) {
+        const d = parseInt(fiche.demandeurs62, 10);
+        const o = parseInt(fiche.offres62, 10);
+        if (isNaN(d) || isNaN(o) || o === 0) return Infinity; // Pas d'offres ou données invalides, mettre à la fin/début selon tri
+        return d / (o * 3); // Ratio simple, plus bas = mieux
+    }
+
+    function sortFiches(fiches, sortBy, sortDir) {
+        return [...fiches].sort((a, b) => {
+            let valA, valB;
+            if (sortBy === 'nom') {
+                valA = a.nom.toLowerCase();
+                valB = b.nom.toLowerCase();
+            } else if (sortBy === 'date') {
+                valA = a.updatedAt || a.createdAt || 0;
+                valB = b.updatedAt || b.createdAt || 0;
+            } else if (sortBy === 'evaluation') {
+                valA = evaluationOrder[a.evaluation] || 0;
+                valB = evaluationOrder[b.evaluation] || 0;
+            } else if (sortBy === 'tension62') {
+                valA = getTensionScore(a);
+                valB = getTensionScore(b);
+            }
+
+            if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
+
+    function renderSummaryGrid() {
+        dom.summaryGridContent.innerHTML = '';
+        if (!appData.metierscopeFiches || appData.metierscopeFiches.length === 0) {
+            dom.summaryGridContent.innerHTML = '<p class="text-center col-span-full">Aucune fiche à afficher.</p>';
+            return;
+        }
+
+        const sortedFiches = sortFiches(appData.metierscopeFiches, appData.summarySort.by, appData.summarySort.dir);
+
+        sortedFiches.forEach(fiche => {
+            const card = document.createElement('div');
+            card.className = 'summary-fiche-card';
+            const evalClass = `eval-${fiche.evaluation.replace(/_/g, '-')}`;
+            const evalText = fiche.evaluation.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            const { text: analysisText, className: analysisClass } = getAnalysisFeedback(fiche.demandeurs62, fiche.offres62);
+            
+            // Pour la date lisible (optionnel, mais bien pour l'affichage si on trie par date)
+            const date = new Date(fiche.updatedAt || fiche.createdAt || fiche.id); // Utilise ID comme fallback date très ancien
+            const formattedDate = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+            card.innerHTML = `
+                <h3 class="${evalClass}">${fiche.nom}</h3>
+                <p style="font-size: 0.8em; color: #6b7280;">Ajoutée/Modifiée le: ${formattedDate}</p>
+                <p>
+                    <a href="${fiche.url}" target="_blank" rel="noopener noreferrer" class="url-link">
+                        ${fiche.url} <i class="fas fa-external-link-alt fa-xs"></i>
+                    </a>
+                </p>
+                <p><strong>Évaluation Marché :</strong> <span class="${evalClass}">${evalText}</span></p>
+                ${(fiche.demandeurs62 || fiche.offres62) ? `<p><strong>Données 62 :</strong> Dem: ${fiche.demandeurs62 || 'N/A'} / Off: ${fiche.offres62 || 'N/A'}</p>` : ''}
+                ${analysisText ? `<p class="p-2 rounded-md ${analysisClass}">${analysisText}</p>` : ''}
+                ${fiche.notes ? `<p class="notes-block"><strong>Notes :</strong><br>${fiche.notes.replace(/</g, "<").replace(/>/g, ">")}</p>` : ''}
+            `; 
+            dom.summaryGridContent.appendChild(card);
+        });
+        updateSortButtonsUI();
+    }
+    
+    function updateSortButtonsUI() {
+        dom.summarySortOptions.querySelectorAll('.sort-button').forEach(button => {
+            const sortBy = button.dataset.sortBy;
+            const sortDir = button.dataset.sortDir;
+            button.classList.remove('active');
+            button.innerHTML = `<i class="fas ${getIconForSort(sortBy)} mr-1"></i>${getButtonTextForSort(sortBy)}`;
+
+            if (sortBy === appData.summarySort.by) {
+                button.classList.add('active');
+                button.innerHTML += ` <i class="fas ${appData.summarySort.dir === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'} ml-1"></i>`;
+            }
+        });
+    }
+
+    function getIconForSort(sortBy) {
+        switch(sortBy) {
+            case 'nom': return 'fa-font';
+            case 'date': return 'fa-calendar-alt';
+            case 'evaluation': return 'fa-chart-line';
+            case 'tension62': return 'fa-users';
+            default: return 'fa-sort';
+        }
+    }
+    function getButtonTextForSort(sortBy) {
+         switch(sortBy) {
+            case 'nom': return 'Nom';
+            case 'date': return 'Date';
+            case 'evaluation': return 'Évaluation Marché';
+            case 'tension62': return 'Tension (62)';
+            default: return 'Trier';
+        }
+    }
+
+
+    dom.summarySortOptions.addEventListener('click', (e) => {
+        const button = e.target.closest('.sort-button');
+        if (!button) return;
+
+        const sortBy = button.dataset.sortBy;
+        let newSortDir;
+
+        if (appData.summarySort.by === sortBy) {
+            // Inverse la direction si on clique sur le même bouton
+            newSortDir = appData.summarySort.dir === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Utilise la direction par défaut du bouton si c'est un nouveau critère
+            newSortDir = button.dataset.sortDir || 'asc';
+        }
+        
+        appData.summarySort.by = sortBy;
+        appData.summarySort.dir = newSortDir;
+        
+        saveToLocalStorage(); // Sauvegarder le choix de tri
+        renderSummaryGrid(); // Re-render avec le nouveau tri
+    });
+
+
+    function showSummaryView(){
+        renderSummaryGrid(); // Assure que c'est trié dès l'affichage
+        dom.mainContentArea.style.display="none";
+        dom.summaryPageArea.style.display="block";
+        document.body.classList.add("summary-view-active");
+        window.scrollTo({top:0,behavior:"auto"})
+    }
+    function showEditorView(){dom.summaryPageArea.style.display="none",dom.mainContentArea.style.display="block",document.body.classList.remove("summary-view-active")}
+    dom.showSummaryBtn.addEventListener("click",showSummaryView);
+    dom.backToEditorBtn.addEventListener("click",showEditorView);
+
+    // Initialisation
+    loadFromLocalStorage(); 
+    renderFichesList();
+    try { populateRiasecTags(); } catch (e) { console.error("ERREUR lors de l'appel à populateRiasecTags:", e); }
+    clearForm();
+    console.log("Gestionnaire Fiches vA10 (avec tri en synthèse) initialisé.");
+});
+</script>
+</body>
+</html>
